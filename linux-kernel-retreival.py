@@ -5,6 +5,7 @@
 import urllib.request
 import os
 import shutil
+import sys
 from urllib.parse import urlparse
 from html.parser import HTMLParser
 
@@ -143,8 +144,8 @@ def make_report(data_list):
 if __name__ == "__main__":
 
     dw_again = False
-    sh_param = sys.argv()
-    urls_to_download = []
+    sh_param = sys.argv
+    urls_ready = []
     if os.path.exists(FOLDER_NAME):
         if len(sh_param) > 1:
             if sh_param[1] == '-rm':
@@ -153,9 +154,12 @@ if __name__ == "__main__":
         else:
             try:
                 lkr = open('lkr-out.csv', 'r')
-                urls_to_download = lkr.readlines()[1:]
+                urls = lkr.readlines()
+                urls = urls[1:]
+                for url in urls:
+                    urls_ready.append(url.split(",")[1])
                 lkr.close()
-            except FileError:
+            except IOError:
                 raise SystemExit
 
 
@@ -171,10 +175,9 @@ if __name__ == "__main__":
         parser = MyHTMLParser()
         html_data = parser.feed(str(data))  # Fills list_html w/response
         urls_to_download = getDownloadLinks(list_html, parser)
+        urls_ready = make_report(urls_to_download)
 
-    urls_ready = make_report(urls_to_download)
     go_home_dir()
-
     for url in urls_ready:
         version = url.split("/")[-2]
         download_link(url, version)
