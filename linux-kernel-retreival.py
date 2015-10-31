@@ -97,15 +97,18 @@ def download_link(link, version):
     name = link.split("/")[-1]
     go_home_dir()
     os.chdir(FOLDER_NAME + "/" + version)
-    if PRINT_TRACES:
-        print("Downloading Version ", version, " - ", name)
-    try:
-        urllib.request.urlretrieve(link, name)
-    except ContentTooShortError:
-        print("Wrong URL: ", link)
+    if name in os.listdir(os.curdir):
+        print("File already downloaded")
+    else:
+        if PRINT_TRACES:
+            print("Downloading Version ", version, " - ", name)
+        try:
+            urllib.request.urlretrieve(link, name)
+        except ContentTooShortError:
+            print("Wrong URL: ", link)
 
-    if not os.path.exists(name):
-        print("Download failed", name)
+        if not os.path.exists(name):
+            print("Download failed", name)
     go_home_dir()
 
 def handle_files():
@@ -139,18 +142,36 @@ def make_report(data_list):
 
 if __name__ == "__main__":
 
+    dw_again = False
+    sh_param = sys.argv()
+    urls_to_download = []
     if os.path.exists(FOLDER_NAME):
-        remove_dir(FOLDER_NAME)
+        if len(sh_param) > 1:
+            if sh_param[1] == '-rm':
+                remove_dir(FOLDER_NAME)
+                dw_again = True
+        else:
+            try:
+                lkr = open('lkr-out.csv', 'r')
+                urls_to_download = lkr.readlines()[1:]
+                lkr.close()
+            except FileError:
+                raise SystemExit
+
+
 
     list_html = []
     file_format = ".tar.gz"
     kernel_url = "https://www.kernel.org/pub/linux/kernel/"
     versions = []
-    response = urllib.request.urlopen(kernel_url)
-    data = response.read()
-    parser = MyHTMLParser()
-    html_data = parser.feed(str(data))  # Fills list_html w/response
-    urls_to_download = getDownloadLinks(list_html, parser)
+
+    if dw_again:
+        response = urllib.request.urlopen(kernel_url)
+        data = response.read()
+        parser = MyHTMLParser()
+        html_data = parser.feed(str(data))  # Fills list_html w/response
+        urls_to_download = getDownloadLinks(list_html, parser)
+
     urls_ready = make_report(urls_to_download)
     go_home_dir()
 
