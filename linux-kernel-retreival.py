@@ -13,7 +13,7 @@ from html.parser import HTMLParser
 INIT_PATH = os.path.abspath(os.curdir)
 FOLDER_NAME = "linux_versions"
 PRINT_TRACES = True
-VERSIONS = ["v1.0", "v1.1", "v1.2", "v1.3", "v2.0", "v2.1", "v2.2", "v2.3", "v2.4", "v2.5", "v2.6", "v3.0"]
+VERSIONS = ["v1.0", "v1.1", "v1.2", "v1.3", "v2.0", "v2.1", "v2.2", "v2.3", "v2.4", "v2.5", "v2.6", "v3.x", "v4.x"]
 SEEN_URLS = []
 
 class MyHTMLParser(HTMLParser):
@@ -59,6 +59,9 @@ def getDownloadLinks(list_html_f, parser):
             if line[:-1] != "v3.0":
                 versions.append(line[:-1])
 
+    if versions != VERSIONS:
+        print("Wrong versions")
+        raise SystemExit
     make_directories(versions)
 
     for version in versions:
@@ -96,20 +99,14 @@ def download_link(link, version):
     os.chdir(FOLDER_NAME + "/" + version)
     if PRINT_TRACES:
         print("Downloading Version ", version, " - ", name)
-    urllib.request.urlretrieve(link, name)
-    go_home_dir()
-    return name
+    try:
+        urllib.request.urlretrieve(link, name)
+    except ContentTooShortError:
+        print("Wrong URL: ", link)
 
-def get_info(file_name, info_files, version):
-    print("Opening: ", file_name, " uncompressing file & getting...")
-    #print("[Name, Date, Size, SLOC]")
-    #print("Delete file: ", file_name)
-    os.chdir(FOLDER_NAME + "/" + version)
-    if os.path.exists(os.curdir + "/" + file_name):
-        print("File exists! ", file_name)
+    if not os.path.exists(name):
+        print("Download failed", name)
     go_home_dir()
-    info = "[Name, Date, Size, SLOC]"
-    info_files.append(info)
 
 def handle_files():
     info_files = []
@@ -135,9 +132,6 @@ def make_report(data_list):
         size = field[3]
         sizes.append(size[:-1])
         line = version + ',' + name + ',' + date + ',' + size + "\r\n"
-        """
-        line = str(field) +
-        """
         file_output.write(line)
     file_output.close()
     print("Making report... Done")
@@ -146,8 +140,8 @@ def make_report(data_list):
 if __name__ == "__main__":
 
     if os.path.exists(FOLDER_NAME):
-        print("Found folder, removing...")
         remove_dir(FOLDER_NAME)
+
     list_html = []
     file_format = ".tar.gz"
     kernel_url = "https://www.kernel.org/pub/linux/kernel/"
@@ -163,4 +157,3 @@ if __name__ == "__main__":
     for url in urls_ready:
         version = url.split("/")[-2]
         download_link(url, version)
-    #remove_dir(FOLDER_NAME)
