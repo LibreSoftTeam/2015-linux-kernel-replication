@@ -3,9 +3,9 @@
 
 # @ Libresoft, October 2015
 import urllib.request
-import os
+import os, sys, subprocess
 import shutil
-import sys
+import tarfile
 from urllib.parse import urlparse
 from html.parser import HTMLParser
 
@@ -16,6 +16,7 @@ FOLDER_NAME = "linux_versions"
 PRINT_TRACES = True
 VERSIONS = ["v1.0", "v1.1", "v1.2", "v1.3", "v2.0", "v2.1", "v2.2", "v2.3", "v2.4", "v2.5", "v2.6", "v3.x", "v4.x"]
 SEEN_URLS = []
+MY_HOME = os.getenv("HOME")
 
 class MyHTMLParser(HTMLParser):
 
@@ -37,13 +38,11 @@ def go_home_dir():
         for i in range(exceeds):
             os.chdir('..')
 
-def make_directories(versions):
+def make_directory(version):
 
-    my_path = INIT_PATH + "/" + FOLDER_NAME
-    os.mkdir(my_path.split("/")[-1])
-    os.chdir(my_path)
-    for version in versions:
-        os.mkdir(version)
+    my_path = INIT_PATH + "/" + FOLDER_NAME + "/" + version
+    print("Creating...", my_path)
+    os.mkdir(version)
 
 def remove_dir(directory):
     if os.path.exists(directory):
@@ -51,19 +50,35 @@ def remove_dir(directory):
             print ("Removing directory: ", directory)
         shutil.rmtree(directory, ignore_errors=True)
 
+def untar_file(file_name):
 
-def getDownloadLinks(list_html_f, parser):
+    name = file_name.split(".")
+    name = name[:-2]
+    name = ("-").join(name)
+    if (file_name.endswith("tar.gz")):
+        tar = tarfile.open(file_name)
+        tar.extractall(name)
+        tar.close()
+        print("Extracted in Current Directory")
+    else:
+        print("Not a tar.gz file: ", file_name)
+
+def getDownloadLinks(list_html_f, parser, versions):
 
     urls_to_download = []
+    os.mkdir(FOLDER_NAME)
+    os.chdir(FOLDER_NAME)
     for line in list_html_f: #list_html:
         if line[0] == "v":
             if line[:-1] != "v3.0":
-                versions.append(line[:-1])
-
+                act_ver = line[:-1]
+                print("appending in versions", act_ver)
+                versions.append(act_ver)
+                make_directory(act_ver)
+    go_home_dir()
     if versions != VERSIONS:
         print("Wrong versions")
         raise SystemExit
-    make_directories(versions)
 
     for version in versions:
         name = "linux-" + version[1:] + file_format
@@ -92,6 +107,50 @@ def getDownloadLinks(list_html_f, parser):
                             print("Appending: ", version, " , ", final_url)
 
     return urls_to_download
+
+def get_sloc(name):
+
+    command = "sloccount " + name
+    counter_SLOC = 0
+    output = subprocess.check_output(command.split())
+    dir_now = os.path.abspath(os.curdir)
+    os.chdir(MY_HOME + "/.slocdata/" + name)
+    fich_sloc = open("all-physical.sloc", "r")
+    lines_sloc = fich_sloc.readlines()
+    fich_sloc.close()
+    for line in lines_sloc:
+        line_info = line.split()
+        if line_info[0] != 'makefile':
+            counter_SLOC += int(line_info[1])
+    os.chdir(MY_HOME)
+    os.chdir(dir_now)
+    return counter_SLOC
+
+def get_data ():
+
+    sloc_cmd = "sloccount "
+    go_home_dir()
+    out_info = open("lkr-out.csv", 'w')
+    os.chdir(FOLDER_NAME)
+    folders = os.listdir(os.curdir)
+    for folder in sorted(folders):
+        os.chdir(folder)
+        kfiles = os.listdir(os.curdir)
+        for kversion in sorted(kfiles):
+            name = kversion.split(".")
+            name = name[:-2]
+            name = ("-").join(name)
+            statinfo = os.stat(kversion)
+            untar_file(kversion)
+            line = folder + "," + name +  ","
+            line += str(statinfo.st_size) + ","
+            num_SLOC = get_sloc(name)
+            line += str(num_SLOC)
+            out_info.write(line + "\r\n")
+            remove_dir(os.curdir + "/" + name)
+        os.chdir("..")
+    out_info.close()
+    print("Finished, check <lkr-out.csv> to see output data")
 
 def download_link(link, version):
 
@@ -124,7 +183,7 @@ def handle_files():
 def make_report(data_list):
     go_home_dir()
     sizes = []
-    file_output = open("lkr-out.csv", 'w')
+    file_output = open("lkr-links.csv", 'w')
     first_line = "Version,Name,Date,Size\r\n"
     file_output.write(first_line)
     urls_ready = []
@@ -143,41 +202,42 @@ def make_report(data_list):
 
 if __name__ == "__main__":
 
-    dw_again = False
+    dw_again = True
     sh_param = sys.argv
     urls_ready = []
+    versions = []
     if os.path.exists(FOLDER_NAME):
         if len(sh_param) > 1:
             if sh_param[1] == '-rm':
                 remove_dir(FOLDER_NAME)
-                dw_again = True
         else:
             try:
-                lkr = open('lkr-out.csv', 'r')
+                lkr = open('lkr-links.csv', 'r')
                 urls = lkr.readlines()
                 urls = urls[1:]
                 for url in urls:
                     urls_ready.append(url.split(",")[1])
                 lkr.close()
+                dw_again = False
             except IOError:
                 raise SystemExit
-
-
 
     list_html = []
     file_format = ".tar.gz"
     kernel_url = "https://www.kernel.org/pub/linux/kernel/"
-    versions = []
 
     if dw_again:
         response = urllib.request.urlopen(kernel_url)
         data = response.read()
         parser = MyHTMLParser()
         html_data = parser.feed(str(data))  # Fills list_html w/response
-        urls_to_download = getDownloadLinks(list_html, parser)
+        urls_to_download = getDownloadLinks(list_html, parser, versions)
         urls_ready = make_report(urls_to_download)
 
     go_home_dir()
+
     for url in urls_ready:
         version = url.split("/")[-2]
         download_link(url, version)
+
+    get_data()
