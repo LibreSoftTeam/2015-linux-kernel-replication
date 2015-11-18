@@ -13,6 +13,7 @@ from html.parser import HTMLParser
 
 INIT_PATH = os.path.abspath(os.curdir)
 FOLDER_NAME = "linux_versions"
+FOLDER_SLOC = "slocdata"
 PRINT_TRACES = True
 VERSIONS = ["v1.0", "v1.1", "v1.2", "v1.3", "v2.0", "v2.1", "v2.2", "v2.3", "v2.4", "v2.5", "v2.6", "v3.x", "v4.x"]
 SEEN_URLS = []
@@ -98,7 +99,6 @@ def getDownloadLinks(list_html_f, parser, versions):
                     relevant_data = list_html[new_index].split()
                     date = relevant_data[0]
                     size_bytes = relevant_data[2]
-                    final_url = download_url + "/" + line2
                     final_file = final_url.split("/")[-1]
                     if final_file not in SEEN_URLS:
                         SEEN_URLS.append(final_file)
@@ -123,6 +123,10 @@ def get_sloc(name):
         if line_info[0] != 'makefile':
             counter_SLOC += int(line_info[1])
     os.chdir(MY_HOME)
+    rename_fld = "mv " + MY_HOME + "/.slocdata/" + name + " "
+    rename_fld += INIT_PATH  + "/" + FOLDER_SLOC +  "/" + name
+    print(rename_fld)
+    output2 = subprocess.check_output(rename_fld.split())
     os.chdir(dir_now)
     return counter_SLOC
 
@@ -137,17 +141,18 @@ def get_data ():
         os.chdir(folder)
         kfiles = os.listdir(os.curdir)
         for kversion in sorted(kfiles):
-            name = kversion.split(".")
-            name = name[:-2]
-            name = ("-").join(name)
-            statinfo = os.stat(kversion)
-            untar_file(kversion)
-            line = folder + "," + name +  ","
-            line += str(statinfo.st_size) + ","
-            num_SLOC = get_sloc(name)
-            line += str(num_SLOC)
-            out_info.write(line + "\r\n")
-            remove_dir(os.curdir + "/" + name)
+            if not os.path.isdir(kversion):
+                name = kversion.split(".")
+                name = name[:-2]
+                name = ("-").join(name)
+                statinfo = os.stat(kversion)
+                untar_file(kversion)
+                line = folder + "," + name +  ","
+                line += str(statinfo.st_size) + ","
+                num_SLOC = get_sloc(name)
+                line += str(num_SLOC)
+                out_info.write(line + "\r\n")
+                # remove_dir(os.curdir + "/" + name)
         os.chdir("..")
     out_info.close()
     print("Finished, check <lkr-out.csv> to see output data")
@@ -206,6 +211,10 @@ if __name__ == "__main__":
     sh_param = sys.argv
     urls_ready = []
     versions = []
+    if os.path.exists(FOLDER_SLOC):
+        remove_dir(FOLDER_SLOC)
+    os.mkdir(FOLDER_SLOC)
+
     if os.path.exists(FOLDER_NAME):
         if len(sh_param) > 1:
             if sh_param[1] == '-rm':
