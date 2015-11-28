@@ -15,9 +15,11 @@ INIT_PATH = os.path.abspath(os.curdir)
 FOLDER_NAME = "linux_versions"
 FOLDER_SLOC = "slocdata"
 PRINT_TRACES = True
-VERSIONS = ["v1.0", "v1.1", "v1.2", "v1.3", "v2.0", "v2.1", "v2.2", "v2.3", "v2.4", "v2.5", "v2.6", "v3.x", "v4.x"]
+VERSIONS = ["v1.0", "v1.1", "v1.2", "v1.3", "v2.0", "v2.1", "v2.2",
+            "v2.3", "v2.4", "v2.5", "v2.6", "v3.x", "v4.x"]
 SEEN_URLS = []
 MY_HOME = os.getenv("HOME")
+DICC_DIRS = {}
 
 class MyHTMLParser(HTMLParser):
 
@@ -99,38 +101,33 @@ def getDownloadLinks(list_html_f, parser, versions):
                     relevant_data = list_html[new_index].split()
                     date = relevant_data[0]
                     size_bytes = relevant_data[2]
+                    final_url = download_url + "/" + line2
                     final_file = final_url.split("/")[-1]
                     if final_file not in SEEN_URLS:
                         SEEN_URLS.append(final_file)
                         urls_to_download.append([version, final_url, date, size_bytes])
                         if PRINT_TRACES:
-                            print("Appending: ", version, " , ", final_url)
+                            print("Appending: ", version, " , ", final_file)
 
     return urls_to_download
 
-def get_sloc(name):
+def do_sloccount(name):
 
-    command = "sloccount " + name
+    command = "sloccount " + name + "/linux"
+    print(command)
     counter_SLOC = 0
     output = subprocess.check_output(command.split())
     dir_now = os.path.abspath(os.curdir)
-    os.chdir(MY_HOME + "/.slocdata/" + name)
-    fich_sloc = open("all-physical.sloc", "r")
-    lines_sloc = fich_sloc.readlines()
-    fich_sloc.close()
-    for line in lines_sloc:
-        line_info = line.split()
-        if line_info[0] != 'makefile':
-            counter_SLOC += int(line_info[1])
     os.chdir(MY_HOME)
-    rename_fld = "mv " + MY_HOME + "/.slocdata/" + name + " "
+    rename_fld = "mv " + MY_HOME + "/.slocdata" + " "
     rename_fld += INIT_PATH  + "/" + FOLDER_SLOC +  "/" + name
     print(rename_fld)
     output2 = subprocess.check_output(rename_fld.split())
     os.chdir(dir_now)
+
     return counter_SLOC
 
-def get_data ():
+def get_data (dates_data):
 
     sloc_cmd = "sloccount "
     go_home_dir()
@@ -145,11 +142,13 @@ def get_data ():
                 name = kversion.split(".")
                 name = name[:-2]
                 name = ("-").join(name)
+                date = dates_data[name]
                 statinfo = os.stat(kversion)
                 untar_file(kversion)
-                line = folder + "," + name +  ","
+                line = folder + "," + name +  "," + date + ","
                 line += str(statinfo.st_size) + ","
-                num_SLOC = get_sloc(name)
+                print("Get SLOC in: ", name)   ############
+                num_SLOC = do_sloccount(name)
                 line += str(num_SLOC)
                 out_info.write(line + "\r\n")
                 # remove_dir(os.curdir + "/" + name)
@@ -214,7 +213,7 @@ if __name__ == "__main__":
     if os.path.exists(FOLDER_SLOC):
         remove_dir(FOLDER_SLOC)
     os.mkdir(FOLDER_SLOC)
-
+    dicc_dates = {}
     if os.path.exists(FOLDER_NAME):
         if len(sh_param) > 1:
             if sh_param[1] == '-rm':
@@ -225,7 +224,13 @@ if __name__ == "__main__":
                 urls = lkr.readlines()
                 urls = urls[1:]
                 for url in urls:
-                    urls_ready.append(url.split(",")[1])
+                    link = url.split(",")[1]
+                    date = url.split(",")[2]
+                    urls_ready.append(link)
+                    name_w_format = link.split("/")[-1]
+                    name_wo_format = name_w_format.split(".")[:-2]
+                    name = "-".join(name_wo_format)
+                    dicc_dates[name] = date
                 lkr.close()
                 dw_again = False
             except IOError:
@@ -249,4 +254,4 @@ if __name__ == "__main__":
         version = url.split("/")[-2]
         download_link(url, version)
 
-    get_data()
+    get_data(dicc_dates)
