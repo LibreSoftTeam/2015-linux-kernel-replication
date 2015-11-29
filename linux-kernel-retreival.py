@@ -113,16 +113,40 @@ def getDownloadLinks(list_html_f, parser, versions):
 
 def do_sloccount(name):
 
+    dir_linux = os.path.abspath(os.curdir) + "/" + name + "/linux"
+    file_list = os.listdir(dir_linux)
+
     command = "sloccount " + name + "/linux"
     print(command)
     counter_SLOC = 0
     output = subprocess.check_output(command.split())
     dir_now = os.path.abspath(os.curdir)
-    os.chdir(MY_HOME)
-    rename_fld = "mv " + MY_HOME + "/.slocdata" + " "
-    rename_fld += INIT_PATH  + "/" + FOLDER_SLOC +  "/" + name
+    mv_cmd = "mv " + MY_HOME + "/.slocdata" + " "
+    new_path = INIT_PATH  + "/" + FOLDER_SLOC +  "/" + name
+    rename_fld = mv_cmd + new_path
     print(rename_fld)
     output2 = subprocess.check_output(rename_fld.split())
+    os.chdir(dir_now)
+
+    os.chdir(dir_linux)
+    modules1 = [item for item in file_list if os.path.isdir(item)]
+    for folder in modules1:
+        command2 = "sloccount " + folder
+        print(command2)
+        try:
+            output2 = subprocess.check_output(command2.split())
+            dir_now2 = os.path.abspath(os.curdir)
+            os.chdir(MY_HOME)
+            mv_cmd = "mv " + MY_HOME + "/.slocdata" + " "
+            new_path2 = new_path + "/" + folder
+            rename_fld2 = mv_cmd + new_path2
+            print(rename_fld2)
+            remove_dir(new_path2)
+            output2 = subprocess.check_output(rename_fld2.split())
+            os.chdir(dir_now2)
+        except subprocess.CalledProcessError:
+            print("Empty output")
+
     os.chdir(dir_now)
 
     return counter_SLOC
@@ -146,10 +170,10 @@ def get_data (dates_data):
                 statinfo = os.stat(kversion)
                 untar_file(kversion)
                 line = folder + "," + name +  "," + date + ","
-                line += str(statinfo.st_size) + ","
+                line += str(statinfo.st_size)
                 print("Get SLOC in: ", name)   ############
                 num_SLOC = do_sloccount(name)
-                line += str(num_SLOC)
+                # line += "," + str(num_SLOC)
                 out_info.write(line + "\r\n")
                 # remove_dir(os.curdir + "/" + name)
         os.chdir("..")
