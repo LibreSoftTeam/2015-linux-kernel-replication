@@ -133,10 +133,10 @@ def do_sloccount(name):
     rename_fld = mv_cmd + new_path
     print(rename_fld)
     output2 = subprocess.check_output(rename_fld.split())
-    os.chdir(dir_now)
 
-    os.chdir(dir_linux)
-    modules1 = [item for item in file_list if os.path.isdir(item)]
+    os.chdir(name + "/" + linux_fname)
+    file_list2 = os.listdir(os.path.abspath(os.curdir))
+    modules1 = [item for item in file_list2 if os.path.isdir(item)]
     for folder in modules1:
         command2 = "sloccount " + folder
         print(command2)
