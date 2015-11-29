@@ -58,13 +58,16 @@ def untar_file(file_name):
     name = file_name.split(".")
     name = name[:-2]
     name = ("-").join(name)
-    if (file_name.endswith("tar.gz")):
-        tar = tarfile.open(file_name)
-        tar.extractall(name)
-        tar.close()
-        print("Extracted in Current Directory")
+    if not os.path.exists(name):
+        if (file_name.endswith("tar.gz")):
+            tar = tarfile.open(file_name)
+            tar.extractall(name)
+            tar.close()
+            print("Extracted in Current Directory")
+        else:
+            print("Not a tar.gz file: ", file_name)
     else:
-        print("Not a tar.gz file: ", file_name)
+        print("Directory ", name, " already extracted")
 
 def getDownloadLinks(list_html_f, parser, versions):
 
@@ -171,11 +174,9 @@ def get_data (dates_data):
                 untar_file(kversion)
                 line = folder + "," + name +  "," + date + ","
                 line += str(statinfo.st_size)
-                print("Get SLOC in: ", name)   ############
                 num_SLOC = do_sloccount(name)
                 # line += "," + str(num_SLOC)
                 out_info.write(line + "\r\n")
-                # remove_dir(os.curdir + "/" + name)
         os.chdir("..")
     out_info.close()
     print("Finished, check <lkr-out.csv> to see output data")
