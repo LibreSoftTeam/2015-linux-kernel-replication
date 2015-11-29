@@ -116,14 +116,18 @@ def getDownloadLinks(list_html_f, parser, versions):
 
 def do_sloccount(name):
 
-    dir_linux = os.path.abspath(os.curdir) + "/" + name + "/linux"
+    dir_now = os.path.abspath(os.curdir)
+    dir_linux = os.path.abspath(os.curdir) + "/" + name
+    os.chdir(dir_linux)
     file_list = os.listdir(dir_linux)
+    linux_fname = file_list[0]
+    os.chdir("..")
+    command = "sloccount " + name + "/" + linux_fname
 
-    command = "sloccount " + name + "/linux"
     print(command)
     counter_SLOC = 0
     output = subprocess.check_output(command.split())
-    dir_now = os.path.abspath(os.curdir)
+
     mv_cmd = "mv " + MY_HOME + "/.slocdata" + " "
     new_path = INIT_PATH  + "/" + FOLDER_SLOC +  "/" + name
     rename_fld = mv_cmd + new_path
