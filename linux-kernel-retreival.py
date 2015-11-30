@@ -173,10 +173,10 @@ def get_data (dates_data):
                 name = kversion.split(".")
                 name = name[:-2]
                 name = ("-").join(name)
-                date = dates_data[name]
+                ver_date = dates_data[name]
                 statinfo = os.stat(kversion)
                 untar_file(kversion)
-                line = folder + "," + name +  "," + date + ","
+                line = folder + "," + name +  "," + ver_date + ","
                 line += str(statinfo.st_size)
                 num_SLOC = do_sloccount(name)
                 # line += "," + str(num_SLOC)
@@ -220,18 +220,23 @@ def make_report(data_list):
     first_line = "Version,Name,Date,Size\r\n"
     file_output.write(first_line)
     urls_ready = []
+    my_date_dicc = {}
     for field in data_list:
         version = field[0]
         name = field[1]
+        name_w_format = name.split("/")[-1]
+        name_wo_format = name_w_format.split(".")[:-2]
+        name_prop = "-".join(name_wo_format)
         urls_ready.append(name)
         date = field[2]
+        my_date_dicc[name_prop] = date
         size = field[3]
         sizes.append(size[:-1])
         line = version + ',' + name + ',' + date + ',' + size + "\r\n"
         file_output.write(line)
     file_output.close()
     print("Making report... Done")
-    return urls_ready
+    return [urls_ready, my_date_dicc]
 
 if __name__ == "__main__":
 
@@ -275,7 +280,9 @@ if __name__ == "__main__":
         parser = MyHTMLParser()
         html_data = parser.feed(str(data))  # Fills list_html w/response
         urls_to_download = getDownloadLinks(list_html, parser, versions)
-        urls_ready = make_report(urls_to_download)
+        urls_output = make_report(urls_to_download)
+        urls_ready = urls_output[0]
+        dicc_dates = urls_output[1]
 
     go_home_dir()
 
