@@ -44,29 +44,99 @@ def format_date(date):
     prop_date = [year, month_format, day]
     return "-".join(prop_date)
 
-def form_insert_query(info_list, index, ntuple):
+def form_insert_version(info_list, ntuple):
 
     my_row = ntuple(*info_list)
-    date_ok = format_date(my_row.date)
 
-    query = "INSERT INTO " + TABLE + " VALUES ("
-    query += str(index) + ",'" + my_row.version + "',"
-    query += str(my_row.size) + ",'" + my_row.group
-    query += "','" + date_ok + "');"
+    table = "version"
+    query = "INSERT INTO " + table + " VALUES ("
+    query += str(my_row.id) + ",'" + my_row.name + "','"
+    query += my_row.family + "','" + my_row.date
+    query += "'," + str(my_row.size) + ");"
     return query
 
-def fill_version_table():
-    lversion = namedtuple('Version', ['group', 'version', 'date', 'size'])
-    lkrReader = csv.reader(open('lkr-out.csv'), delimiter=',', quotechar='|')
-    cont = 0
-    for row in lkrReader:
-        cont += 1
-        my_query = form_insert_query(row, cont, lversion)
+def form_insert_module(info_list, ntuple):
+
+    my_row = ntuple(*info_list)
+
+    table = "module"
+    query = "INSERT INTO " + table + " VALUES ("
+    query += str(my_row.id) + ",'" + my_row.name + "',"
+    query += str(my_row.version_id) + ");"
+    return query
+
+def form_insert_submodule(info_list, ntuple):
+
+    my_row = ntuple(*info_list)
+
+    table = "submodule"
+    query = "INSERT INTO " + table + " VALUES ("
+    query += str(my_row.id) + ",'" + my_row.name + "',"
+    query += str(my_row.module_id) + ");"
+    return query
+
+def form_insert_lang(info_list, ntuple):
+
+    my_row = ntuple(*info_list)
+
+    table = "lang"
+    query = "INSERT INTO " + table + " VALUES ("
+    query += str(my_row.id) + ",'" + my_row.name + "');"
+    return query
+
+def form_insert_file(info_list, ntuple):
+
+    my_row = ntuple(*info_list)
+
+    table = "file"
+    query = "INSERT INTO " + table + " VALUES ("
+    query += str(my_row.id) + ",'" + my_row.path + "',"
+    query += str(my_row.sloc) + "," + str(my_row.lang_id) + ","
+    query += str(my_row.module_id) + "," + str(my_row.submodule_id) + ","
+    query += str(my_row.version_id) + ");"
+    return query
+
+def fill_tables():
+
+    lversion = namedtuple('Version', ['name', 'id', 'family', 'date', 'size'])
+    versionReader = csv.reader(open('version.csv'), delimiter=',', quotechar='|')
+    for row in versionReader:
+        my_query = form_insert_version(row, lversion)
+        print "Running query: " + my_query
+        run_query(my_query)
+
+
+    lmodule = namedtuple('Module', ['name', 'id', 'version_id'])
+    modReader = csv.reader(open('module.csv'), delimiter=',', quotechar='|')
+    for row in modReader:
+        my_query = form_insert_module(row, lmodule)
+        print "Running query: " + my_query
+        run_query(my_query)
+
+
+    lsubmodule = namedtuple('Submodule', ['name', 'id', 'module_id'])
+    submodReader = csv.reader(open('submodule.csv'), delimiter=',', quotechar='|')
+    for row in submodReader:
+        my_query = form_insert_submodule(row, lsubmodule)
+        print "Running query: " + my_query
+        run_query(my_query)
+
+    llang = namedtuple('Lang', ['name', 'id'])
+    langReader = csv.reader(open('lang.csv'), delimiter=',', quotechar='|')
+    for row in langReader:
+        my_query = form_insert_lang(row, llang)
+        print "Running query: " + my_query
+        run_query(my_query)
+
+    lfile = namedtuple('File', ['id', 'name', 'path', 'sloc', 'lang_id', 'module_id', 'submodule_id', 'version_id'])
+    fileReader = csv.reader(open('file.csv'), delimiter=',', quotechar='|')
+    for row in fileReader:
+        my_query = form_insert_file(row, lfile)
         print "Running query: " + my_query
         run_query(my_query)
 
 if __name__ == "__main__":
 
-    print "Reading <lkr-out.csv> & register data into a DB\r\n"
-    fill_version_table()
+    print "Reading csv's & register data into a DB\r\n"
+    fill_tables()
     print "...Done\r\n\r\n"
