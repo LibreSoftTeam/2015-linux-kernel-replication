@@ -20,9 +20,9 @@ class table_creator:
         self.dicc_module = {}
         # {'name': module_id, version_id}
         self.counter_module = 0
-        self.dicc_submodule = {'none': [0,0]} # FIXME
+        self.dicc_submodule = {} # FIXME
         # {'name': submodule_id, module_id}
-        self.counter_submodule = 1
+        self.counter_submodule = 0
         self.dicc_lang = {}
         # {'name': lang_id}
         self.counter_lang = 0
@@ -99,17 +99,22 @@ class table_creator:
         submodule_id = 0
         if len(list_paths) == 5:
             my_module = "/".join(list_paths)
-            module_id = self.get_module_id(my_module ) # + '/top_dir'
-            submodule_id = self.dicc_submodule['none']
+            my_submodule = my_module # FIXME top_dir in both?
+            module_id = self.get_module_id(my_module) # + '/top_dir'
+            submodule_id = self.get_submodule_id(my_submodule)
         elif len(list_paths) == 6:
             my_module = "/".join(list_paths)
             submod_path = my_module #+ '/top_dir'
             module_id = self.get_module_id(my_module)
             submodule_id = self.get_submodule_id(submod_path)
-
         elif len(list_paths) > 6:
             my_module = "/".join(list_paths[:4])
             my_submodule = "/".join(list_paths[:5])
+            module_id = self.get_module_id(my_module)
+            submodule_id = self.get_submodule_id(my_submodule)
+        else:
+            my_module = "/".join(list_paths)
+            my_submodule = my_module
             module_id = self.get_module_id(my_module)
             submodule_id = self.get_submodule_id(my_submodule)
 
