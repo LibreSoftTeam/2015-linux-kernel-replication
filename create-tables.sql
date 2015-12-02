@@ -1,5 +1,11 @@
 USE lkr;
 
+DROP TABLE file;
+DROP TABLE lang;
+DROP TABLE submodule;
+DROP TABLE module;
+DROP TABLE version;
+
 CREATE TABLE version
 (
 id INT NOT NULL,
@@ -42,6 +48,7 @@ PRIMARY KEY (id)
 CREATE TABLE file
 (
 id INT NOT NULL,
+name VARCHAR(50) NOT NULL,
 path VARCHAR(100) NOT NULL,
 sloc INT NOT NULL,
 lang_id INT NOT NULL,
