@@ -90,7 +90,7 @@ def form_insert_file(info_list, ntuple):
 
     table = "file"
     query = "INSERT INTO " + table + " VALUES ("
-    query += str(my_row.id) + ",'" + my_row.path + "',"
+    query += str(my_row.id) + ",'" + my_row.name + "','" + my_row.path + "',"
     query += str(my_row.sloc) + "," + str(my_row.lang_id) + ","
     query += str(my_row.module_id) + "," + str(my_row.submodule_id) + ","
     query += str(my_row.version_id) + ");"
