@@ -11,7 +11,7 @@ import MySQLdb
 DB_HOST = 'localhost'
 DB_USER = 'operator'
 DB_PASS = 'operator'
-DB_NAME = 'lkr'
+DB_NAME = 'linux_kernel_test'
 TABLE = 'version'
 DICC_MONTHS = {'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
                 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
@@ -99,7 +99,7 @@ def form_insert_file(info_list, ntuple):
 def fill_tables():
 
     lversion = namedtuple('Version', ['name', 'id', 'family', 'date', 'size'])
-    versionReader = csv.reader(open('version.csv'), delimiter=',', quotechar='|')
+    versionReader = csv.reader(open('version.csv'), delimiter='&', quotechar='|')
     for row in versionReader:
         my_query = form_insert_version(row, lversion)
         print "Running query: " + my_query
@@ -107,7 +107,7 @@ def fill_tables():
 
 
     lmodule = namedtuple('Module', ['name', 'id', 'version_id'])
-    modReader = csv.reader(open('module.csv'), delimiter=',', quotechar='|')
+    modReader = csv.reader(open('module.csv'), delimiter='&', quotechar='|')
     for row in modReader:
         my_query = form_insert_module(row, lmodule)
         print "Running query: " + my_query
@@ -115,21 +115,21 @@ def fill_tables():
 
 
     lsubmodule = namedtuple('Submodule', ['name', 'id', 'module_id'])
-    submodReader = csv.reader(open('submodule.csv'), delimiter=',', quotechar='|')
+    submodReader = csv.reader(open('submodule.csv'), delimiter='&', quotechar='|')
     for row in submodReader:
         my_query = form_insert_submodule(row, lsubmodule)
         print "Running query: " + my_query
         run_query(my_query)
 
     llang = namedtuple('Lang', ['name', 'id'])
-    langReader = csv.reader(open('lang.csv'), delimiter=',', quotechar='|')
+    langReader = csv.reader(open('lang.csv'), delimiter='&', quotechar='|')
     for row in langReader:
         my_query = form_insert_lang(row, llang)
         print "Running query: " + my_query
         run_query(my_query)
 
     lfile = namedtuple('File', ['id', 'name', 'path', 'sloc', 'lang_id', 'module_id', 'submodule_id', 'version_id'])
-    fileReader = csv.reader(open('file.csv'), delimiter=',', quotechar='|')
+    fileReader = csv.reader(open('file.csv'), delimiter='&', quotechar='|')
     for row in fileReader:
         my_query = form_insert_file(row, lfile)
         print "Running query: " + my_query

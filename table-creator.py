@@ -178,7 +178,7 @@ if __name__ == "__main__":
         list_new = []
         for item in aux:
             list_new.append(str(item))
-        line = str(x) + "," + ",".join(list_new)
+        line = str(x) + "&" + "&".join(list_new)
         csv_file.write(line + "\r\n")
 
     for x in tcreator.dicc_version.keys():
@@ -186,7 +186,7 @@ if __name__ == "__main__":
         list_new = []
         for item in aux:
             list_new.append(str(item))
-        line = str(x) + "," + ",".join(list_new)
+        line = str(x) + "&" + "&".join(list_new)
         csv_version.write(line + "\r\n")
 
     for x in tcreator.dicc_module.keys():
@@ -194,7 +194,7 @@ if __name__ == "__main__":
         list_new = []
         for item in aux:
             list_new.append(str(item))
-        line = str(x) + "," + ",".join(list_new)
+        line = str(x) + "&" + "&".join(list_new)
         csv_module.write(line + "\r\n")
 
     for x in tcreator.dicc_submodule.keys():
@@ -202,11 +202,11 @@ if __name__ == "__main__":
         list_new = []
         for item in aux:
             list_new.append(str(item))
-        line = str(x) + "," + ",".join(list_new)
+        line = str(x) + "&" + "&".join(list_new)
         csv_submodule.write(line + "\r\n")
 
     for x in tcreator.dicc_lang.keys():
-        line = x + "," + str(tcreator.dicc_lang[x])
+        line = x + "&" + str(tcreator.dicc_lang[x])
         csv_lang.write(line + "\r\n")
 
     print("Output: csv's...Done\r\n\r\n")
