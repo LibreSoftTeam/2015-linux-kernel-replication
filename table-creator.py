@@ -13,7 +13,7 @@ class table_creator:
     def __init__(self):
         self.dicc_months = {'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
                         'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
-                        'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dic': '12', }
+                        'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12', }
         self.dicc_version = {}
         # {'version': [version_id, family, date, size]}
         self.counter_version = 0
@@ -67,6 +67,7 @@ class table_creator:
     def get_module_id(self, module):
 
         module_id = 0
+        #print ("Module: ", module)
         if module in self.dicc_module.keys():
             module_id = self.dicc_module[module][0]
         else:
@@ -103,13 +104,14 @@ class table_creator:
             module_id = self.get_module_id(my_module) # + '/top_dir'
             submodule_id = self.get_submodule_id(my_submodule)
         elif len(list_paths) == 6:
-            my_module = "/".join(list_paths)
-            submod_path = my_module #+ '/top_dir'
+            my_module = "/".join(list_paths[:-1])
+            submod_path = my_module + '/top_dir'
             module_id = self.get_module_id(my_module)
             submodule_id = self.get_submodule_id(submod_path)
         elif len(list_paths) > 6:
-            my_module = "/".join(list_paths[:4])
-            my_submodule = "/".join(list_paths[:5])
+
+            my_module = "/".join(list_paths[:5])
+            my_submodule = "/".join(list_paths[:6])
             module_id = self.get_module_id(my_module)
             submodule_id = self.get_submodule_id(my_submodule)
         else:
