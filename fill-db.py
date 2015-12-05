@@ -7,6 +7,7 @@
 import csv
 from collections import namedtuple
 import MySQLdb
+import sys
 
 DB_HOST = 'localhost'
 DB_USER = 'operator'
