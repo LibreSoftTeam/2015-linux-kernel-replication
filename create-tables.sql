@@ -1,4 +1,4 @@
-USE lkr;
+USE linux_kernel_test;
 
 DROP TABLE file;
 DROP TABLE lang;
