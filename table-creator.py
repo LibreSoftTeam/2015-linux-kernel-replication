@@ -100,8 +100,8 @@ class table_creator:
         submodule_id = 0
         if len(list_paths) == 5:
             my_module = "/".join(list_paths)
-            my_submodule = my_module # FIXME top_dir in both?
-            module_id = self.get_module_id(my_module) # + '/top_dir'
+            my_submodule = my_module + '/top_dir'
+            module_id = self.get_module_id(my_module)
             submodule_id = self.get_submodule_id(my_submodule)
         elif len(list_paths) == 6:
             my_module = "/".join(list_paths[:-1])
@@ -115,8 +115,8 @@ class table_creator:
             module_id = self.get_module_id(my_module)
             submodule_id = self.get_submodule_id(my_submodule)
         else:
-            my_module = "/".join(list_paths)
-            my_submodule = my_module
+            my_module = "/".join(list_paths) + '/top_dir'
+            my_submodule = my_module + '/top_dir'
             module_id = self.get_module_id(my_module)
             submodule_id = self.get_submodule_id(my_submodule)
 
