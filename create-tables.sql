@@ -1,11 +1,8 @@
 
-DROP TABLE file;
-DROP TABLE lang;
-DROP TABLE submodule;
-DROP TABLE module;
-DROP TABLE version;
+CREATE DATABASE linux_kernel_replication;
+USE linux_kernel_replication;
 
-CREATE TABLE version
+CREATE TABLE versions
 (
 id INT NOT NULL,
 name VARCHAR(20) NOT NULL,
@@ -15,36 +12,28 @@ size INT NOT NULL DEFAULT 0,
 PRIMARY KEY (id)
 );
 
-CREATE TABLE module
+CREATE TABLE modules
 (
 id INT NOT NULL,
 name VARCHAR(60) NOT NULL,
-version_id INT NOT NULL,
-PRIMARY KEY (id),
-CONSTRAINT fk_version
-  FOREIGN KEY (version_id)
-  REFERENCES version(id)
+PRIMARY KEY (id)
 );
 
-CREATE TABLE submodule
+CREATE TABLE submodules
 (
 id INT NOT NULL,
 name VARCHAR(60) NOT NULL,
-module_id INT NOT NULL,
-PRIMARY KEY (id),
-CONSTRAINT fk_module
-  FOREIGN KEY (module_id)
-  REFERENCES module(id)
+PRIMARY KEY (id)
 );
 
-CREATE TABLE lang
+CREATE TABLE langs
 (
 id INT NOT NULL,
 name VARCHAR(15) NOT NULL,
 PRIMARY KEY (id)
 );
 
-CREATE TABLE file
+CREATE TABLE files
 (
 id INT NOT NULL,
 name VARCHAR(50) NOT NULL,
@@ -57,14 +46,14 @@ version_id INT NOT NULL,
 PRIMARY KEY (id),
 CONSTRAINT fk_lang
   FOREIGN KEY (lang_id)
-  REFERENCES lang(id),
+  REFERENCES langs(id),
 CONSTRAINT fk_module_file
     FOREIGN KEY (module_id)
-    REFERENCES module(id),
+    REFERENCES modules(id),
 CONSTRAINT fk_submodule_file
       FOREIGN KEY (submodule_id)
-      REFERENCES submodule(id),
+      REFERENCES submodules(id),
 CONSTRAINT fk_version_file
   FOREIGN KEY (version_id)
-  REFERENCES version(id)
+  REFERENCES versions(id)
 );
