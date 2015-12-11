@@ -87,7 +87,7 @@ class table_creator:
         self.connection = pymysql.connect(host='localhost',
                                      user='operator',
                                      password='operator',
-                                     db='lktest',
+                                     db='linux_kernel_replication',
                                      charset='utf8mb4',
                                      cursorclass=pymysql.cursors.DictCursor)
 
@@ -294,5 +294,5 @@ if __name__ == "__main__":
     print("Output: Entering files data in database...\r\n\r\n")
 
     tcreator.connection.close()
-    os.system("mysql -u operator -poperator lktest < files.sql")
+    os.system("mysql -u operator -poperator linux_kernel_replication < files.sql")
     print("...Done\r\n\r\n")
