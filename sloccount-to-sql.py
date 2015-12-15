@@ -6,9 +6,10 @@
 import os
 from collections import namedtuple
 import csv
-import pymysql.cursors
+import mysql.connector
 
 # TODO: Check and improve functions
+# TODO: Check for errors while excuting 'files.sql' (sometimes occurs)
 
 def form_insert_version(info_list, ntuple):
 
@@ -84,20 +85,17 @@ class table_creator:
         self.counter_file = 0
 
         self.outf = "_outfile.dat"
-        self.connection = pymysql.connect(host='localhost',
-                                     user='operator',
-                                     password='operator',
-                                     db='linux_kernel_replication',
-                                     charset='utf8mb4',
-                                     cursorclass=pymysql.cursors.DictCursor)
+        self.cnx = mysql.connector.connect(user='operator',
+                                           password='operator',
+                                           host='127.0.0.1',
+                                           database='linux_kernel_replication')
 
     def intro_query(self, query):
 
-
-        with self.connection.cursor() as cursor:
-            # Create a new record
-            cursor.execute(query)
-        self.connection.commit()
+        cursor = self.cnx.cursor()
+        cursor.execute(query)
+        self.cnx.commit()
+        cursor.close()
 
     def read_response(self, answer):
 
@@ -291,8 +289,9 @@ if __name__ == "__main__":
         print("Running query: " + my_query)
         tcreator.intro_query(my_query)
 
+    tcreator.cnx.close()
     print("Output: Entering files data in database...\r\n\r\n")
 
-    tcreator.connection.close()
     os.system("mysql -u operator -poperator linux_kernel_replication < files.sql")
+
     print("...Done\r\n\r\n")
